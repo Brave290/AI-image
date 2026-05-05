@@ -1,327 +1,678 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ephemeral AI Logo Generator</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: 'Segoe UI', system-ui, sans-serif;
-      background: #0f0f1a;
-      color: #e0e0ff;
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 1.5rem;
-    }
-    .container {
-      max-width: 900px;
-      width: 100%;
-      background: rgba(20, 20, 40, 0.8);
-      backdrop-filter: blur(12px);
-      border-radius: 1.5rem;
-      padding: 2rem;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
-      border: 1px solid rgba(255,255,255,0.1);
-    }
-    h1 {
-      font-size: 2.2rem;
-      font-weight: 700;
-      background: linear-gradient(135deg, #a78bfa, #f472b6);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      margin-bottom: 0.5rem;
-    }
-    .subtitle {
-      color: #94a3b8;
-      margin-bottom: 2rem;
-      font-size: 1rem;
-    }
-    label {
-      display: block;
-      margin-bottom: 0.5rem;
-      font-weight: 600;
-      color: #cbd5e1;
-    }
-    input {
-      width: 100%;
-      padding: 0.9rem 1.2rem;
-      font-size: 1.1rem;
-      border-radius: 1rem;
-      border: 2px solid #2d2d5e;
-      background: #1a1a2e;
-      color: #e0e0ff;
-      outline: none;
-      transition: border 0.2s;
-    }
-    input:focus {
-      border-color: #a78bfa;
-    }
-    .btn {
-      background: linear-gradient(135deg, #7c3aed, #db2777);
-      color: white;
-      border: none;
-      padding: 0.9rem 2rem;
-      font-size: 1.1rem;
-      font-weight: 600;
-      border-radius: 1rem;
-      cursor: pointer;
-      margin-top: 1rem;
-      width: 100%;
-      transition: opacity 0.2s, transform 0.1s;
-    }
-    .btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-      transform: none;
-    }
-    .btn:active:not(:disabled) {
-      transform: scale(0.98);
-    }
-    .status {
-      margin-top: 1rem;
-      padding: 0.75rem;
-      border-radius: 0.8rem;
-      background: #1e1e3f;
-      font-size: 0.9rem;
-      color: #cbd5e1;
-      text-align: center;
-    }
-    .suggested-name {
-      background: #2d2d5e;
-      border-radius: 0.8rem;
-      padding: 1rem;
-      margin-top: 1rem;
-      font-size: 1.3rem;
-      font-weight: 700;
-      color: #f472b6;
-      text-align: center;
-    }
-    .logos-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 1.2rem;
-      margin-top: 2rem;
-    }
-    .logo-card {
-      background: #1e1e3f;
-      border-radius: 1rem;
-      padding: 0.8rem;
-      text-align: center;
-      border: 1px solid #2d2d5e;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    .logo-card img {
-      width: 100%;
-      height: auto;
-      border-radius: 0.8rem;
-      object-fit: contain;
-      background: #0f0f1a;
-      aspect-ratio: 1 / 1;
-    }
-    .download-btn {
-      background: #3b3b6e;
-      color: white;
-      border: none;
-      padding: 0.5rem 1rem;
-      border-radius: 0.6rem;
-      margin-top: 0.6rem;
-      cursor: pointer;
-      font-size: 0.85rem;
-      font-weight: 600;
-      transition: background 0.2s;
-    }
-    .download-btn:hover {
-      background: #5a5a8c;
-    }
-    .warning {
-      color: #f87171;
-      font-size: 0.8rem;
-      margin-top: 1rem;
-      text-align: center;
-    }
-    .hidden {
-      display: none;
-    }
-    /* Responsive adjustments */
-    @media (max-width: 600px) {
-      .container { padding: 1.5rem; }
-      h1 { font-size: 1.7rem; }
-      .logos-grid { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LogoAI - Instant Logo Generator</title>
+    <style>
+        :root {
+            --bg-primary: #0f0f0f;
+            --bg-secondary: #1a1a1a;
+            --bg-tertiary: #252525;
+            --text-primary: #ececec;
+            --text-secondary: #b4b4b4;
+            --border: #2e2e2e;
+            --accent: #7c3aed;
+            --accent-hover: #6d28d9;
+            --danger: #ef4444;
+            --success: #10b981;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            line-height: 1.5;
+        }
+
+        .app {
+            width: 100%;
+            max-width: 800px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 16px;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            padding: 32px 16px 24px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 24px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #a78bfa, #f472b6, #7c3aed);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        /* Chat container */
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            max-height: 70vh;
+            overflow-y: auto;
+            padding: 8px;
+        }
+
+        .chat-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chat-container::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 3px;
+        }
+
+        /* Message bubbles */
+        .message {
+            display: flex;
+            gap: 12px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.user {
+            justify-content: flex-end;
+        }
+
+        .message-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .message.ai .message-avatar {
+            background: linear-gradient(135deg, #7c3aed, #db2777);
+        }
+
+        .message.user .message-avatar {
+            background: var(--bg-tertiary);
+            order: 2;
+        }
+
+        .message-content {
+            max-width: 80%;
+            padding: 12px 16px;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+        }
+
+        .message.ai .message-content {
+            background: var(--bg-secondary);
+            border-bottom-left-radius: 4px;
+        }
+
+        .message.user .message-content {
+            background: var(--bg-tertiary);
+            border-bottom-right-radius: 4px;
+        }
+
+        /* Logo grid inside message */
+        .logo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .logo-item {
+            background: var(--bg-primary);
+            border-radius: 12px;
+            padding: 12px;
+            text-align: center;
+            border: 1px solid var(--border);
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .logo-item:hover {
+            transform: translateY(-2px);
+            border-color: var(--accent);
+        }
+
+        .logo-item img {
+            width: 100%;
+            aspect-ratio: 1;
+            object-fit: contain;
+            border-radius: 8px;
+            background: #1a1a1a;
+        }
+
+        .download-btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-top: 8px;
+            width: 100%;
+            transition: background 0.2s;
+        }
+
+        .download-btn:hover {
+            background: var(--accent-hover);
+        }
+
+        .download-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* Input area */
+        .input-area {
+            margin-top: 24px;
+            display: flex;
+            gap: 12px;
+            position: sticky;
+            bottom: 16px;
+            background: var(--bg-primary);
+            padding: 16px 0;
+            border-top: 1px solid var(--border);
+        }
+
+        .input-wrapper {
+            flex: 1;
+            position: relative;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px 20px;
+            font-size: 1rem;
+            border-radius: 28px;
+            border: 1px solid var(--border);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.2);
+        }
+
+        input::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .send-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: none;
+            background: var(--accent);
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s, transform 0.1s;
+            flex-shrink: 0;
+        }
+
+        .send-btn:hover:not(:disabled) {
+            background: var(--accent-hover);
+        }
+
+        .send-btn:active:not(:disabled) {
+            transform: scale(0.95);
+        }
+
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Loading dots */
+        .typing-indicator {
+            display: none;
+            padding: 16px;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-secondary);
+        }
+
+        .typing-indicator.active {
+            display: flex;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent);
+            animation: bounce 1.4s infinite;
+        }
+
+        .dot:nth-child(2) { animation-delay: 0.2s; }
+        .dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes bounce {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-10px); }
+        }
+
+        /* Status */
+        .status-bar {
+            text-align: center;
+            padding: 8px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            display: none;
+        }
+
+        .status-bar.visible {
+            display: block;
+        }
+
+        /* Warning */
+        .warning {
+            color: var(--danger);
+            font-size: 0.8rem;
+            text-align: center;
+            margin-top: 8px;
+            display: none;
+        }
+
+        .warning.visible {
+            display: block;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .message-content {
+                max-width: 90%;
+            }
+            
+            .logo-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .app {
+                padding: 8px;
+            }
+            
+            .message-content {
+                max-width: 95%;
+                padding: 10px 12px;
+            }
+            
+            .logo-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+            }
+            
+            input {
+                padding: 12px 16px;
+                font-size: 0.95rem;
+            }
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <h1>⚡ Ephemeral Logo Lab</h1>
-    <p class="subtitle">Enter your name → get a fresh brand name + 4 logos. Nothing saved, download now!</p>
-    
-    <label for="userName">Your Name</label>
-    <input type="text" id="userName" placeholder="e.g. Alex Rivera" maxlength="30">
-    <button class="btn" id="generateBtn">✨ Generate My Brand</button>
+    <div class="app">
+        <!-- Header -->
+        <div class="header">
+            <h1>⚡ LogoAI</h1>
+            <p>Enter a name, get a brand + 4 logos. Nothing is saved.</p>
+        </div>
 
-    <div id="status" class="status hidden"></div>
-    <div id="suggestedName" class="suggested-name hidden"></div>
+        <!-- Status Bar -->
+        <div class="status-bar" id="statusBar">Loading AI models...</div>
 
-    <div id="logosContainer" class="logos-grid hidden"></div>
-    <p id="warningMsg" class="warning hidden">⚠️ Logos are held only in memory. Download before leaving!</p>
-  </div>
+        <!-- Chat Area -->
+        <div class="chat-container" id="chatContainer">
+            <!-- Welcome message -->
+            <div class="message ai">
+                <div class="message-avatar">🤖</div>
+                <div class="message-content">
+                    <p>👋 Hey! I'm your AI logo designer. I'll help you create a unique brand name and 4 logo variations.</p>
+                    <p style="margin-top: 8px; color: var(--text-secondary);">Just type your name below and hit send. Everything happens in your browser - nothing is ever saved.</p>
+                </div>
+            </div>
+        </div>
 
-  <script type="module">
-    import { pipeline } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2';
+        <!-- Typing indicator -->
+        <div class="typing-indicator" id="typingIndicator">
+            <span>AI is working</span>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+        </div>
 
-    // DOM elements
-    const userNameInput = document.getElementById('userName');
-    const generateBtn = document.getElementById('generateBtn');
-    const statusDiv = document.getElementById('status');
-    const suggestedNameDiv = document.getElementById('suggestedName');
-    const logosContainer = document.getElementById('logosContainer');
-    const warningMsg = document.getElementById('warningMsg');
+        <!-- Warning -->
+        <div class="warning" id="warning">⚠️ Logos exist only in memory. Download them before refreshing!</div>
 
-    let nameGenerator = null;
-    let imageGenerator = null;
-    let modelsLoaded = false;
+        <!-- Input Area -->
+        <div class="input-area">
+            <div class="input-wrapper">
+                <input 
+                    type="text" 
+                    id="userInput" 
+                    placeholder="Type your name... (e.g. Alex)"
+                    maxlength="40"
+                    autocomplete="off"
+                >
+            </div>
+            <button class="send-btn" id="sendBtn" disabled>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+            </button>
+        </div>
+    </div>
 
-    // Helper: update status
-    function setStatus(text, isError = false) {
-      statusDiv.textContent = text;
-      statusDiv.classList.remove('hidden');
-      statusDiv.style.color = isError ? '#f87171' : '#cbd5e1';
-    }
+    <script type="module">
+        import { pipeline } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2/dist/transformers.min.js';
 
-    // Load both models on page load
-    async function loadModels() {
-      setStatus('Loading AI models... (this may take a minute)');
-      try {
-        // Load text generation pipeline for name suggestion (using GPT-2)
-        nameGenerator = await pipeline('text-generation', 'Xenova/gpt2');
-        setStatus('Name model loaded. Loading image model...');
-        // Load image generation pipeline (Stable Diffusion Turbo)
-        imageGenerator = await pipeline('text-to-image', 'Xenova/stable-diffusion-turbo');
-        modelsLoaded = true;
-        setStatus('✅ Ready! Enter your name and generate.', false);
-        generateBtn.disabled = false;
-      } catch (error) {
-        console.error(error);
-        setStatus('❌ Failed to load models. Please use a modern browser with WebGPU support.', true);
-        generateBtn.disabled = true;
-      }
-    }
+        // DOM Elements
+        const chatContainer = document.getElementById('chatContainer');
+        const userInput = document.getElementById('userInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const typingIndicator = document.getElementById('typingIndicator');
+        const statusBar = document.getElementById('statusBar');
+        const warning = document.getElementById('warning');
 
-    // Generate a creative brand name from user's input using AI
-    async function generateBrandName(userName) {
-      const prompt = `Create a unique, modern brand name based on the name "${userName}". The brand name should be catchy, short, and suitable for a tech startup or creative studio.`;
-      const result = await nameGenerator(prompt, {
-        max_new_tokens: 20,
-        temperature: 0.9,
-        do_sample: true,
-      });
-      const fullText = result[0].generated_text;
-      // Extract the suggested name: take everything after the prompt and clean it
-      const suggestion = fullText.replace(prompt, '').trim().split('\n')[0].replace(/["']/g, '').trim();
-      // Fallback if empty
-      return suggestion.length > 0 ? suggestion : userName + 'Lab';
-    }
+        let nameGenerator = null;
+        let imageGenerator = null;
+        let isReady = false;
 
-    // Generate 4 logos using the brand name, with different style prompts
-    async function generateLogos(brandName) {
-      const styles = [
-        `${brandName} logo, modern minimalist wordmark, sleek typography, flat vector, high contrast, white background`,
-        `${brandName} logo, abstract icon with the name below, geometric, vibrant purple-pink gradient, vector art`,
-        `${brandName} logo, elegant serif wordmark, luxury branding, gold and black, centered`,
-        `${brandName} logo, creative lettermark with integrated symbol, tech startup, neon blue and cyan, dark background`
-      ];
-      const images = [];
-      for (const prompt of styles) {
-        setStatus(`Generating logo ${images.length + 1} of 4...`);
-        const rawImage = await imageGenerator(prompt, {
-          num_inference_steps: 1, // turbo model: single step
-          width: 512,
-          height: 512,
+        // Show status
+        function updateStatus(text, isError = false) {
+            statusBar.textContent = text;
+            statusBar.classList.add('visible');
+            statusBar.style.color = isError ? 'var(--danger)' : 'var(--text-secondary)';
+        }
+
+        // Add message to chat
+        function addMessage(content, type = 'ai') {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            
+            const avatar = document.createElement('div');
+            avatar.className = 'message-avatar';
+            avatar.textContent = type === 'ai' ? '🤖' : '👤';
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            
+            if (typeof content === 'string') {
+                contentDiv.innerHTML = `<p>${content}</p>`;
+            } else {
+                contentDiv.appendChild(content);
+            }
+            
+            messageDiv.appendChild(avatar);
+            messageDiv.appendChild(contentDiv);
+            chatContainer.appendChild(messageDiv);
+            
+            // Scroll to bottom
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        // Create logo grid element
+        function createLogoGrid(imageUrls, brandName) {
+            const container = document.createElement('div');
+            
+            const title = document.createElement('p');
+            title.style.fontWeight = '600';
+            title.style.marginBottom = '8px';
+            title.textContent = `✨ Your brand: ${brandName}`;
+            container.appendChild(title);
+            
+            const grid = document.createElement('div');
+            grid.className = 'logo-grid';
+            
+            imageUrls.forEach((url, index) => {
+                const item = document.createElement('div');
+                item.className = 'logo-item';
+                
+                const img = document.createElement('img');
+                img.src = url;
+                img.alt = `Logo ${index + 1}`;
+                img.loading = 'lazy';
+                
+                const btn = document.createElement('button');
+                btn.className = 'download-btn';
+                btn.textContent = `⬇ Download Logo ${index + 1}`;
+                btn.addEventListener('click', () => {
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `${brandName.replace(/[^a-zA-Z0-9]/g, '_')}_logo_${index + 1}.png`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                });
+                
+                item.appendChild(img);
+                item.appendChild(btn);
+                grid.appendChild(item);
+            });
+            
+            container.appendChild(grid);
+            
+            // Show warning
+            warning.classList.add('visible');
+            
+            return container;
+        }
+
+        // Load models
+        async function loadModels() {
+            try {
+                updateStatus('🔄 Loading AI models... This might take a minute on first visit.');
+                
+                // Load text generation model
+                nameGenerator = await pipeline('text-generation', 'Xenova/gpt2');
+                updateStatus('✅ Name model ready. Loading image model...');
+                
+                // Load image generation model
+                imageGenerator = await pipeline('text-to-image', 'Xenova/stable-diffusion-turbo');
+                
+                isReady = true;
+                sendBtn.disabled = false;
+                updateStatus('✅ Ready! Enter your name to generate logos.');
+                
+                // Hide status after 5 seconds
+                setTimeout(() => {
+                    statusBar.classList.remove('visible');
+                }, 5000);
+                
+            } catch (error) {
+                console.error('Model loading error:', error);
+                updateStatus('❌ Failed to load AI models. Please try a different browser (Chrome/Edge recommended).', true);
+                
+                // Try fallback with simpler models
+                try {
+                    updateStatus('🔄 Trying fallback models...');
+                    nameGenerator = await pipeline('text-generation', 'Xenova/distilgpt2');
+                    imageGenerator = await pipeline('text-to-image', 'Xenova/anything-v4');
+                    isReady = true;
+                    sendBtn.disabled = false;
+                    updateStatus('✅ Ready with fallback models. Quality may vary.');
+                } catch (fallbackError) {
+                    console.error('Fallback error:', fallbackError);
+                    updateStatus('❌ This device may not support browser-based AI. Please try on a desktop with Chrome.', true);
+                }
+            }
+        }
+
+        // Generate brand name
+        async function generateBrandName(userName) {
+            const prompt = `Create a unique, modern, catchy brand name based on "${userName}". The brand name should be short and memorable. Brand name:`;
+            
+            const result = await nameGenerator(prompt, {
+                max_new_tokens: 15,
+                temperature: 0.8,
+                do_sample: true,
+                top_p: 0.9,
+                repetition_penalty: 1.2
+            });
+            
+            const fullText = result[0].generated_text;
+            const suggestion = fullText
+                .replace(prompt, '')
+                .trim()
+                .split(/[\n.!?]/)[0]
+                .replace(/["'`]/g, '')
+                .trim();
+            
+            return suggestion.length > 1 ? suggestion : userName + 'ify';
+        }
+
+        // Generate logos
+        async function generateLogos(brandName) {
+            const styles = [
+                `${brandName} professional logo, minimalist wordmark, clean typography, flat design, centered, white background`,
+                `${brandName} modern logo, abstract geometric icon with name, gradient purple pink, vector style`,
+                `${brandName} luxury logo, elegant serif font, gold accents, dark background, premium look`,
+                `${brandName} tech startup logo, creative symbol integrated with text, neon blue cyan, futuristic`
+            ];
+            
+            const images = [];
+            
+            for (let i = 0; i < styles.length; i++) {
+                updateStatus(`🎨 Generating logo ${i + 1} of 4...`);
+                
+                try {
+                    const result = await imageGenerator(styles[i], {
+                        num_inference_steps: 1,
+                        width: 512,
+                        height: 512,
+                        guidance_scale: 7.5
+                    });
+                    
+                    const blob = await result.toBlob();
+                    const url = URL.createObjectURL(blob);
+                    images.push(url);
+                } catch (error) {
+                    console.error(`Logo ${i + 1} generation failed:`, error);
+                    // Create a placeholder on error
+                    const canvas = document.createElement('canvas');
+                    canvas.width = 512;
+                    canvas.height = 512;
+                    const ctx = canvas.getContext('2d');
+                    ctx.fillStyle = '#1a1a1a';
+                    ctx.fillRect(0, 0, 512, 512);
+                    ctx.fillStyle = '#7c3aed';
+                    ctx.font = 'bold 48px sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(brandName, 256, 256);
+                    const url = canvas.toDataURL();
+                    images.push(url);
+                }
+            }
+            
+            return images;
+        }
+
+        // Handle generation
+        async function handleGenerate() {
+            const userName = userInput.value.trim();
+            if (!userName || !isReady) return;
+            
+            // Clear input
+            userInput.value = '';
+            sendBtn.disabled = true;
+            
+            // Add user message
+            addMessage(`"${userName}"`, 'user');
+            
+            // Show typing indicator
+            typingIndicator.classList.add('active');
+            warning.classList.remove('visible');
+            updateStatus('🧠 Creating your brand name...');
+            
+            try {
+                // Generate brand name
+                const brandName = await generateBrandName(userName);
+                updateStatus('🎨 Generating 4 logo variations...');
+                
+                // Generate logos
+                const logoUrls = await generateLogos(brandName);
+                
+                // Hide typing indicator
+                typingIndicator.classList.remove('active');
+                
+                // Add logos to chat
+                const logoGrid = createLogoGrid(logoUrls, brandName);
+                addMessage(logoGrid, 'ai');
+                
+                updateStatus('✅ Done! Download your logos now.');
+                
+                // Hide status after 3 seconds
+                setTimeout(() => {
+                    statusBar.classList.remove('visible');
+                }, 3000);
+                
+            } catch (error) {
+                console.error('Generation error:', error);
+                typingIndicator.classList.remove('active');
+                addMessage('❌ Sorry, something went wrong. Please try again.', 'ai');
+                updateStatus('❌ Generation failed. Please try again.', true);
+            } finally {
+                sendBtn.disabled = false;
+                userInput.focus();
+            }
+        }
+
+        // Event listeners
+        sendBtn.addEventListener('click', handleGenerate);
+        
+        userInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                handleGenerate();
+            }
         });
-        // Convert raw output to blob URL
-        const blob = await rawImage.toBlob();
-        const url = URL.createObjectURL(blob);
-        images.push(url);
-      }
-      return images;
-    }
+        
+        // Focus input on load
+        userInput.focus();
 
-    // Display logos in grid with download buttons
-    function displayLogos(logoUrls, brandName) {
-      logosContainer.innerHTML = '';
-      logoUrls.forEach((url, index) => {
-        const card = document.createElement('div');
-        card.className = 'logo-card';
-        const img = document.createElement('img');
-        img.src = url;
-        img.alt = `Logo option ${index + 1} for ${brandName}`;
-        const btn = document.createElement('button');
-        btn.className = 'download-btn';
-        btn.textContent = '⬇ Download';
-        btn.addEventListener('click', () => {
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = `${brandName.replace(/\s+/g, '_')}_logo_${index + 1}.png`;
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-        });
-        card.appendChild(img);
-        card.appendChild(btn);
-        logosContainer.appendChild(card);
-      });
-      logosContainer.classList.remove('hidden');
-      warningMsg.classList.remove('hidden');
-    }
-
-    // Main generation flow
-    async function handleGenerate() {
-      const userName = userNameInput.value.trim();
-      if (!userName) {
-        setStatus('Please enter your name first.', true);
-        return;
-      }
-      if (!modelsLoaded) {
-        setStatus('Models are still loading... please wait.', true);
-        return;
-      }
-
-      generateBtn.disabled = true;
-      setStatus('🧠 Crafting your brand name...');
-      suggestedNameDiv.classList.add('hidden');
-      logosContainer.classList.add('hidden');
-      warningMsg.classList.add('hidden');
-
-      try {
-        const brandName = await generateBrandName(userName);
-        suggestedNameDiv.textContent = `✨ Your brand: ${brandName}`;
-        suggestedNameDiv.classList.remove('hidden');
-        setStatus('🎨 Generating 4 logo variations...');
-
-        const logoUrls = await generateLogos(brandName);
-        displayLogos(logoUrls, brandName);
-        setStatus('✅ Done! Download your logos now.');
-      } catch (error) {
-        console.error(error);
-        setStatus('❌ Something went wrong. Please try again.', true);
-      } finally {
-        generateBtn.disabled = false;
-      }
-    }
-
-    // Event listeners
-    generateBtn.addEventListener('click', handleGenerate);
-    userNameInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') handleGenerate();
-    });
-
-    // Kick off model loading
-    loadModels();
-  </script>
+        // Start loading models
+        loadModels();
+    </script>
 </body>
 </html>
