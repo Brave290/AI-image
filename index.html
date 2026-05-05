@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ephemeral AI Logo Generator</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #0f0f1a;
+      color: #e0e0ff;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 1.5rem;
+    }
+    .container {
+      max-width: 900px;
+      width: 100%;
+      background: rgba(20, 20, 40, 0.8);
+      backdrop-filter: blur(12px);
+      border-radius: 1.5rem;
+      padding: 2rem;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    h1 {
+      font-size: 2.2rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #a78bfa, #f472b6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.5rem;
+    }
+    .subtitle {
+      color: #94a3b8;
+      margin-bottom: 2rem;
+      font-size: 1rem;
+    }
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      color: #cbd5e1;
+    }
+    input {
+      width: 100%;
+      padding: 0.9rem 1.2rem;
+      font-size: 1.1rem;
+      border-radius: 1rem;
+      border: 2px solid #2d2d5e;
+      background: #1a1a2e;
+      color: #e0e0ff;
+      outline: none;
+      transition: border 0.2s;
+    }
+    input:focus {
+      border-color: #a78bfa;
+    }
+    .btn {
+      background: linear-gradient(135deg, #7c3aed, #db2777);
+      color: white;
+      border: none;
+      padding: 0.9rem 2rem;
+      font-size: 1.1rem;
+      font-weight: 600;
+      border-radius: 1rem;
+      cursor: pointer;
+      margin-top: 1rem;
+      width: 100%;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .btn:active:not(:disabled) {
+      transform: scale(0.98);
+    }
+    .status {
+      margin-top: 1rem;
+      padding: 0.75rem;
+      border-radius: 0.8rem;
+      background: #1e1e3f;
+      font-size: 0.9rem;
+      color: #cbd5e1;
+      text-align: center;
+    }
+    .suggested-name {
+      background: #2d2d5e;
+      border-radius: 0.8rem;
+      padding: 1rem;
+      margin-top: 1rem;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #f472b6;
+      text-align: center;
+    }
+    .logos-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1.2rem;
+      margin-top: 2rem;
+    }
+    .logo-card {
+      background: #1e1e3f;
+      border-radius: 1rem;
+      padding: 0.8rem;
+      text-align: center;
+      border: 1px solid #2d2d5e;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .logo-card img {
+      width: 100%;
+      height: auto;
+      border-radius: 0.8rem;
+      object-fit: contain;
+      background: #0f0f1a;
+      aspect-ratio: 1 / 1;
+    }
+    .download-btn {
+      background: #3b3b6e;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 0.6rem;
+      margin-top: 0.6rem;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+      transition: background 0.2s;
+    }
+    .download-btn:hover {
+      background: #5a5a8c;
+    }
+    .warning {
+      color: #f87171;
+      font-size: 0.8rem;
+      margin-top: 1rem;
+      text-align: center;
+    }
+    .hidden {
+      display: none;
+    }
+    /* Responsive adjustments */
+    @media (max-width: 600px) {
+      .container { padding: 1.5rem; }
+      h1 { font-size: 1.7rem; }
+      .logos-grid { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>⚡ Ephemeral Logo Lab</h1>
+    <p class="subtitle">Enter your name → get a fresh brand name + 4 logos. Nothing saved, download now!</p>
+    
+    <label for="userName">Your Name</label>
+    <input type="text" id="userName" placeholder="e.g. Alex Rivera" maxlength="30">
+    <button class="btn" id="generateBtn">✨ Generate My Brand</button>
+
+    <div id="status" class="status hidden"></div>
+    <div id="suggestedName" class="suggested-name hidden"></div>
+
+    <div id="logosContainer" class="logos-grid hidden"></div>
+    <p id="warningMsg" class="warning hidden">⚠️ Logos are held only in memory. Download before leaving!</p>
+  </div>
+
+  <script type="module">
+    import { pipeline } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2';
+
+    // DOM elements
+    const userNameInput = document.getElementById('userName');
+    const generateBtn = document.getElementById('generateBtn');
+    const statusDiv = document.getElementById('status');
+    const suggestedNameDiv = document.getElementById('suggestedName');
+    const logosContainer = document.getElementById('logosContainer');
+    const warningMsg = document.getElementById('warningMsg');
+
+    let nameGenerator = null;
+    let imageGenerator = null;
+    let modelsLoaded = false;
+
+    // Helper: update status
+    function setStatus(text, isError = false) {
+      statusDiv.textContent = text;
+      statusDiv.classList.remove('hidden');
+      statusDiv.style.color = isError ? '#f87171' : '#cbd5e1';
+    }
+
+    // Load both models on page load
+    async function loadModels() {
+      setStatus('Loading AI models... (this may take a minute)');
+      try {
+        // Load text generation pipeline for name suggestion (using GPT-2)
+        nameGenerator = await pipeline('text-generation', 'Xenova/gpt2');
+        setStatus('Name model loaded. Loading image model...');
+        // Load image generation pipeline (Stable Diffusion Turbo)
+        imageGenerator = await pipeline('text-to-image', 'Xenova/stable-diffusion-turbo');
+        modelsLoaded = true;
+        setStatus('✅ Ready! Enter your name and generate.', false);
+        generateBtn.disabled = false;
+      } catch (error) {
+        console.error(error);
+        setStatus('❌ Failed to load models. Please use a modern browser with WebGPU support.', true);
+        generateBtn.disabled = true;
+      }
+    }
+
+    // Generate a creative brand name from user's input using AI
+    async function generateBrandName(userName) {
+      const prompt = `Create a unique, modern brand name based on the name "${userName}". The brand name should be catchy, short, and suitable for a tech startup or creative studio.`;
+      const result = await nameGenerator(prompt, {
+        max_new_tokens: 20,
+        temperature: 0.9,
+        do_sample: true,
+      });
+      const fullText = result[0].generated_text;
+      // Extract the suggested name: take everything after the prompt and clean it
+      const suggestion = fullText.replace(prompt, '').trim().split('\n')[0].replace(/["']/g, '').trim();
+      // Fallback if empty
+      return suggestion.length > 0 ? suggestion : userName + 'Lab';
+    }
+
+    // Generate 4 logos using the brand name, with different style prompts
+    async function generateLogos(brandName) {
+      const styles = [
+        `${brandName} logo, modern minimalist wordmark, sleek typography, flat vector, high contrast, white background`,
+        `${brandName} logo, abstract icon with the name below, geometric, vibrant purple-pink gradient, vector art`,
+        `${brandName} logo, elegant serif wordmark, luxury branding, gold and black, centered`,
+        `${brandName} logo, creative lettermark with integrated symbol, tech startup, neon blue and cyan, dark background`
+      ];
+      const images = [];
+      for (const prompt of styles) {
+        setStatus(`Generating logo ${images.length + 1} of 4...`);
+        const rawImage = await imageGenerator(prompt, {
+          num_inference_steps: 1, // turbo model: single step
+          width: 512,
+          height: 512,
+        });
+        // Convert raw output to blob URL
+        const blob = await rawImage.toBlob();
+        const url = URL.createObjectURL(blob);
+        images.push(url);
+      }
+      return images;
+    }
+
+    // Display logos in grid with download buttons
+    function displayLogos(logoUrls, brandName) {
+      logosContainer.innerHTML = '';
+      logoUrls.forEach((url, index) => {
+        const card = document.createElement('div');
+        card.className = 'logo-card';
+        const img = document.createElement('img');
+        img.src = url;
+        img.alt = `Logo option ${index + 1} for ${brandName}`;
+        const btn = document.createElement('button');
+        btn.className = 'download-btn';
+        btn.textContent = '⬇ Download';
+        btn.addEventListener('click', () => {
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `${brandName.replace(/\s+/g, '_')}_logo_${index + 1}.png`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+        });
+        card.appendChild(img);
+        card.appendChild(btn);
+        logosContainer.appendChild(card);
+      });
+      logosContainer.classList.remove('hidden');
+      warningMsg.classList.remove('hidden');
+    }
+
+    // Main generation flow
+    async function handleGenerate() {
+      const userName = userNameInput.value.trim();
+      if (!userName) {
+        setStatus('Please enter your name first.', true);
+        return;
+      }
+      if (!modelsLoaded) {
+        setStatus('Models are still loading... please wait.', true);
+        return;
+      }
+
+      generateBtn.disabled = true;
+      setStatus('🧠 Crafting your brand name...');
+      suggestedNameDiv.classList.add('hidden');
+      logosContainer.classList.add('hidden');
+      warningMsg.classList.add('hidden');
+
+      try {
+        const brandName = await generateBrandName(userName);
+        suggestedNameDiv.textContent = `✨ Your brand: ${brandName}`;
+        suggestedNameDiv.classList.remove('hidden');
+        setStatus('🎨 Generating 4 logo variations...');
+
+        const logoUrls = await generateLogos(brandName);
+        displayLogos(logoUrls, brandName);
+        setStatus('✅ Done! Download your logos now.');
+      } catch (error) {
+        console.error(error);
+        setStatus('❌ Something went wrong. Please try again.', true);
+      } finally {
+        generateBtn.disabled = false;
+      }
+    }
+
+    // Event listeners
+    generateBtn.addEventListener('click', handleGenerate);
+    userNameInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') handleGenerate();
+    });
+
+    // Kick off model loading
+    loadModels();
+  </script>
+</body>
+</html>
